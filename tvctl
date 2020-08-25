@@ -1,0 +1,70 @@
+#!/bin/bash
+
+serial="/dev/ttyUSB0";
+baudrate="9600";
+
+debugout() {
+	echo "[TVCTL] $1";
+}
+
+sendCommand () {
+	echo "$1" > $serial;
+}
+
+init () {
+	[[ -c "$serial" ]] \
+		&& debugout "Found $serial" \
+		|| debugout "ERROR: $serial does not exist" \
+	
+	# Shut up.
+	[[ ! -c $serial ]] && exit 1;
+
+	debugout "Setting baudrate $baudrate"
+	stty -F $serial $baudrate;
+	exit 0;
+}
+
+toggletv () {
+	sendCommand "toggle";
+	debugout "Sending IR signal.";
+}
+
+brightadjust() {
+	case "$1" in
+		"up")
+			sendCommand "daylight";
+			debugout "Starting command chain 'daylight'...";
+			notify-send "Turning up display brightness/backlight--good mornin', gorgeous. <3"
+			;;
+		"down")
+			sendCommand "nightlight";
+			debugout "Starting command chain 'nightlight'...";
+			notify-send "Turning down display brightness/backlight--night, night gorgeous. <3"
+			;;
+		*)
+			debugout "Unknown brightadjust command chain $1";
+			;;
+	esac
+}
+
+main () {
+	case "$1" in
+		"toggle")
+			toggletv;
+			;;
+		"init")
+			init;
+			;;
+		"daylight")
+			brightadjust up;
+			;;
+		"nightlight")
+			brightadjust down;
+			;;
+		*)
+			debugout "unrecognized command: $1"
+			;;
+	esac
+}
+
+main $1;

@@ -4,7 +4,6 @@
 #define _IR_ENABLE_DEFAULT_ false
 #define SEND_SAMSUNG true
 
-#include <Wire.h>
 #include "ircodes.h"
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
