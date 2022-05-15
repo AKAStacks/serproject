@@ -24,6 +24,8 @@
 #define LED_BUILTIN 13 // ESP32 DOES NOT DEFINE LED_BUILTIN
 #endif
 
+#define DEBUG 1
+
 int LED = LED_BUILTIN;
 ESP8266WebServer server(80);
 
@@ -50,9 +52,11 @@ int currentCommandStep = 0;
 unsigned long nextThought = 0;
 
 void announce(String message) {
- Serial.println("> " + message);
- flashLED();
- Serial.flush();
+  if (DEBUG == 1) {
+    Serial.println("> " + message);
+    flashLED();
+    Serial.flush();
+  }
 }
 
 void flashLED() {
@@ -73,8 +77,7 @@ void handleSerial() {
     flashLED();
     inputString.trim();
     if (inputString == "toggle" || inputString == "ߗ") {
-      irsend.sendSAMSUNG(SamsungPowerToggle);
-      announce("OK, turning the TV off...");
+      tvToggle();
     } else if (inputString == "exit") {
       inCommandChain = false;
       brightAdjust = none;
@@ -178,11 +181,16 @@ void setup() {
   } */
 
   server.on("/", handleRoot);
-  server.on("/ajaxinfo.txt", flashLED);
+  server.on("/ajaxinfo.txt", tvToggle);
   server.begin();
   
   irsend.begin();
   announce("Waking up... ahh...");
+}
+
+void tvToggle() {
+  irsend.sendSAMSUNG(SamsungPowerToggle);
+  announce("OK, turning the TV off...");
 }
 
 void loop() {
