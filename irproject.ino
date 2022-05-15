@@ -16,7 +16,7 @@
 
 #include <ESP8266WebServer.h>
 #include <Uri.h>
-#include <ESP8266mDNS.h>
+//#include <ESP8266mDNS.h>
 
 #include <WiFiClient.h>
 
@@ -121,7 +121,33 @@ void handleCommandChain() {
 
 void handleRoot() {
   server.send(200, "text/html",
-  "hello");
+  "<html>\
+    <body style='background: black; overflow: hidden;'>\
+        <div style='width: 100vw; height: 100vh; display: grid; place-items: center; color: white;'>\
+        Ayyo was good\
+        </br>this post brought to you by @emacs arduino-mode\
+        </br>\
+        <button type='button' onclick='toggleLED();'>Toggle LED</button>\
+        <script>\
+            var ledState = 0;\
+            function toggleLED() {\
+              let xhttp = new XMLHttpRequest();\
+              xhttp.onreadystatechange = function() {\
+                if (this.readyState == 4 && this.status == 200) {\
+                    if (ledState === 0) {\
+                        ledState = 1;\
+                    } else {\
+                        ledState = 0;\
+                    };\
+                }\
+              };\
+              xhttp.open('POST', 'ajaxinfo.txt', true);\
+              xhttp.send();\
+            };\
+        </script>\
+      </div>\
+     </body>\
+   </html>");
 }
 
 void setup() {
@@ -134,6 +160,7 @@ void setup() {
 
   // We need to connect to WiFi and set up mDNS here
   WiFi.mode(WIFI_STA);
+  WiFi.hostname("tvctl");
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -146,11 +173,12 @@ void setup() {
   announce("IP address: ");
   announce(WiFi.localIP().toString().c_str());
 
-  if (MDNS.begin("tvctl")) {
+/*  if (MDNS.begin("tvctl")) {
 	  announce("mDNS responder started");
-  }
+  } */
 
   server.on("/", handleRoot);
+  server.on("/ajaxinfo.txt", flashLED);
   server.begin();
   
   irsend.begin();
@@ -169,5 +197,5 @@ void loop() {
     handleSerial();
   }
   server.handleClient();
-  MDNS.update();
+  //MDNS.update();
 }
