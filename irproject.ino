@@ -79,21 +79,12 @@ void handleSerial() {
     if (inputString == "toggle" || inputString == "ߗ") {
       tvToggle();
     } else if (inputString == "exit") {
-      inCommandChain = false;
-      brightAdjust = none;
-      currentCommandStep = 0;
-      irsend.sendSAMSUNG(sExit);
-      irsend.sendSAMSUNG(sExit);
-      irsend.sendSAMSUNG(sExit);
-    } else if (inputString == "daylight") {
-      inCommandChain = true;
-      brightAdjust = up;
-      announce("OK, setting TV to day mode.");
-    } else if (inputString == "nightlight") {
-      inCommandChain = true;
-      brightAdjust = down;
-      announce("OK, setting TV to night mode.");
-    } else {
+	  tvExit();
+   } else if (inputString == "daylight") {
+	  tvBrightUp();
+   } else if (inputString == "nightlight") {
+	  tvBrightDown();
+   } else {
       while (Serial.available() > 0) {
         Serial.read();
       }
@@ -123,28 +114,33 @@ void handleCommandChain() {
 }
 
 void handleRoot() {
+/* 1 = toggle TV
+   2 = daylight
+   3 = nightlight
+   4 = exit */
   server.send(200, "text/html",
   "<html>\
     <body style='background: black; overflow: hidden;'>\
         <div style='width: 100vw; height: 100vh; display: grid; place-items: center; color: white;'>\
-        Ayyo was good\
-        </br>this post brought to you by @emacs arduino-mode\
-        </br>\
-        <button type='button' onclick='toggleLED();'>Toggle LED</button>\
+       <button type='button' onclick='doLED(1);'>Toggle LED</button>\
+        <button type='button' onclick='doLED(2);'>Daylight</button>\
+        <button type='button' onclick='doLED(3);'>Nightlight</button>\
+        <button type='button' onclick='doLED(4);'>Cancel</button>\
         <script>\
             var ledState = 0;\
-            function toggleLED() {\
+            function doLED(doWhat) {\
               let xhttp = new XMLHttpRequest();\
               xhttp.onreadystatechange = function() {\
-                if (this.readyState == 4 && this.status == 200) {\
-                    if (ledState === 0) {\
-                        ledState = 1;\
-                    } else {\
-                        ledState = 0;\
-                    };\
-                }\
-              };\
-              xhttp.open('POST', 'ajaxinfo.txt', true);\
+                if (this.readyState == 4 && this.status == 200) {}};\
+              if (doWhat == 1) {\
+                xhttp.open('POST', 'toggle.txt', true);\
+              } else if (doWhat == 2) {\
+                xhttp.open('POST', 'daylight.txt', true);\
+              } else if (doWhat == 3) {\
+                xhttp.open('POST', 'nightlight.txt', true);\
+              } else if (doWhat == 4) {\
+                xhttp.open('POST', 'exit.txt', true);\
+              }\
               xhttp.send();\
             };\
         </script>\
@@ -181,7 +177,10 @@ void setup() {
   } */
 
   server.on("/", handleRoot);
-  server.on("/ajaxinfo.txt", tvToggle);
+  server.on("/toggle.txt", tvToggle);
+  server.on("/daylight.txt", tvBrightUp);
+  server.on("/nightlight.txt", tvBrightDown);
+  server.on("/exit.txt", tvExit);
   server.begin();
   
   irsend.begin();
@@ -191,6 +190,27 @@ void setup() {
 void tvToggle() {
   irsend.sendSAMSUNG(SamsungPowerToggle);
   announce("OK, turning the TV off...");
+}
+
+void tvBrightUp() {
+  inCommandChain = true;
+  brightAdjust = up;
+  announce("OK, setting TV to day mode.");
+}
+
+void tvBrightDown() {
+  inCommandChain = true;
+  brightAdjust = down;
+  announce("OK, setting TV to night mode.");
+}
+
+void tvExit() {
+      inCommandChain = false;
+      brightAdjust = none;
+      currentCommandStep = 0;
+      irsend.sendSAMSUNG(sExit);
+      irsend.sendSAMSUNG(sExit);
+      irsend.sendSAMSUNG(sExit);
 }
 
 void loop() {
