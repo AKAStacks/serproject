@@ -16,9 +16,12 @@
 int LED = LED_BUILTIN;
 
 #define IRLED D5  // GPIO 14 (D5)
+#define MOTOR D2
+
 IRsend irsend(IRLED);
 // Delay between ticks in ms
 const int thoughtDelay = 1000;
+
 // Length of command chains (static for now)
 const int arrayLength = 37;
 enum BrightAdjust { up, down, none };
@@ -29,13 +32,14 @@ bool stringComplete = false;
 bool inCommandChain = false;
 BrightAdjust brightAdjust = none;
 int currentCommandStep = 0;
+bool motorRun = false;
 
 unsigned long nextThought = 0;
 
-/* void announce(String message) { */
- // Serial.println("> " + message);
- // Serial.flush();
-// }
+void announce(String message) {
+ Serial.println("> " + message);
+ Serial.flush();
+}
 
 void handleSerial() {
   if (Serial.available()) {
@@ -51,6 +55,13 @@ void handleSerial() {
     if (inputString == "toggle" || inputString == "ߗ") {
       irsend.sendSAMSUNG(SamsungPowerToggle);
       /* announce("OK, turning the TV off..."); */
+    } else if (inputString == "exit") {
+      inCommandChain = false;
+      brightAdjust = none;
+      currentCommandStep = 0;
+      irsend.sendSAMSUNG(sExit);
+      irsend.sendSAMSUNG(sExit);
+      irsend.sendSAMSUNG(sExit);
     } else if (inputString == "daylight") {
       inCommandChain = true;
       brightAdjust = up;
@@ -89,10 +100,19 @@ void handleCommandChain() {
   }
 }
 
+/* void doMotor() { */
+/*   if (motorRun) { */
+/*     digitalWrite(MOTOR, HIGH); */
+/*   } else { */
+/*     digitalWrite(MOTOR, LOW); */
+/*   } */
+/* } */
+
 void setup() {
   Serial.begin(9600);
 
   pinMode(IRLED, OUTPUT);
+  pinMode(MOTOR, OUTPUT);
 
   inputString.reserve(200);
 
