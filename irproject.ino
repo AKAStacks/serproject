@@ -17,6 +17,7 @@
 #include <ESP8266WebServer.h>
 #include <Uri.h>
 #include <ESP8266mDNS.h>
+
 #include <WiFiClient.h>
 
 #ifndef LED_BUILTIN
@@ -50,7 +51,14 @@ unsigned long nextThought = 0;
 
 void announce(String message) {
  Serial.println("> " + message);
+ flashLED();
  Serial.flush();
+}
+
+void flashLED() {
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(100);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void handleSerial() {
@@ -58,15 +66,15 @@ void handleSerial() {
     if (Serial.peek() == '>') {
       return;
     }
-    digitalWrite(LED_BUILTIN, HIGH);
     inputString = Serial.readString();
     stringComplete = true;
   }
   if (stringComplete) {
+    flashLED();
     inputString.trim();
     if (inputString == "toggle" || inputString == "ߗ") {
       irsend.sendSAMSUNG(SamsungPowerToggle);
-      /* announce("OK, turning the TV off..."); */
+      announce("OK, turning the TV off...");
     } else if (inputString == "exit") {
       inCommandChain = false;
       brightAdjust = none;
@@ -77,17 +85,16 @@ void handleSerial() {
     } else if (inputString == "daylight") {
       inCommandChain = true;
       brightAdjust = up;
-      /* announce("OK, setting TV to day mode."); */
+      announce("OK, setting TV to day mode.");
     } else if (inputString == "nightlight") {
       inCommandChain = true;
       brightAdjust = down;
-      /* announce("OK, setting TV to night mode."); */
+      announce("OK, setting TV to night mode.");
     } else {
       while (Serial.available() > 0) {
         Serial.read();
       }
    }
-    digitalWrite(LED_BUILTIN, LOW);
     stringComplete = false;
     inputString = "";
   }
@@ -106,7 +113,7 @@ void handleCommandChain() {
       } else if (brightAdjust == down) {
         irsend.sendSAMSUNG(nightLight[currentCommandStep]);
       }
-      // announce(String(currentCommandStep));
+      announce(String(currentCommandStep));
       currentCommandStep++;
     }
   }
@@ -121,6 +128,7 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(IRLED, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   inputString.reserve(200);
 
@@ -139,24 +147,27 @@ void setup() {
   announce(WiFi.localIP().toString().c_str());
 
   if (MDNS.begin("tvctl")) {
-	announce("mDNS responder started");
+	  announce("mDNS responder started");
   }
 
   server.on("/", handleRoot);
+  server.begin();
   
   irsend.begin();
-  /* announce("Waking up... ahh..."); */
+  announce("Waking up... ahh...");
 }
 
 void loop() {
   if (nextThought == 0) {
-    /* announce("Having my first thought--this is awful."); */
+    announce("Having my first thought--this is awful.");
   }
   if (millis() >= nextThought) {
+	// announce("Having a thought");
     nextThought += thoughtDelay;
 	// We need to add a function to handle HTTP requests
     handleCommandChain();
     handleSerial();
   }
+  server.handleClient();
   MDNS.update();
 }
