@@ -7,6 +7,7 @@
 #ifndef STASSID
 #define STASSID "MonkeyMan"
 #define STAPSK "3012773249"
+#endif
 
 #include "ircodes.h"
 #include <IRremoteESP8266.h>
@@ -115,23 +116,22 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(IRLED, OUTPUT);
-  pinMode(MOTOR, OUTPUT);
 
   inputString.reserve(200);
 
-  # We need to connect to WiFi and set up mDNS here
+  // We need to connect to WiFi and set up mDNS here
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    announce("Awaiting WiFi connection... ")
+    announce("Awaiting WiFi connection... ");
   }
 
   announce("Connected to: ");
   announce(ssid);
   announce("IP address: ");
-  announce(WiFi.localIP());
+  announce(WiFi.localIP().toString().c_str());
 
   if (MDNS.begin("esp8266")) {
 	announce("mDNS responder started");
@@ -147,7 +147,7 @@ void loop() {
   }
   if (millis() >= nextThought) {
     nextThought += thoughtDelay;
-	# We need to add a function to handle HTTP requests
+	// We need to add a function to handle HTTP requests
     handleCommandChain();
     handleSerial();
   }
