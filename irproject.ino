@@ -4,16 +4,29 @@
 #define _IR_ENABLE_DEFAULT_ false
 #define SEND_SAMSUNG true
 
+#ifndef STASSID
+#define STASSID "MonkeyMan"
+#define STAPSK "3012773249"
+
 #include "ircodes.h"
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <ir_Samsung.h>
+
+#include <ESP8266WebServer.h>
+#include <Uri.h>
+#include <ESP8266mDNS.h>
+#include <WiFiClient.h>
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 13 // ESP32 DOES NOT DEFINE LED_BUILTIN
 #endif
 
 int LED = LED_BUILTIN;
+ESP8266WebServer server(80);
+
+const char* ssid = STASSID;
+const char* password = STAPSK;
 
 #define IRLED D5  // GPIO 14 (D5)
 
@@ -106,6 +119,24 @@ void setup() {
 
   inputString.reserve(200);
 
+  # We need to connect to WiFi and set up mDNS here
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    announce("Awaiting WiFi connection... ")
+  }
+
+  announce("Connected to: ");
+  announce(ssid);
+  announce("IP address: ");
+  announce(WiFi.localIP());
+
+  if (MDNS.begin("esp8266")) {
+	announce("mDNS responder started");
+  }
+  
   irsend.begin();
   /* announce("Waking up... ahh..."); */
 }
@@ -116,7 +147,9 @@ void loop() {
   }
   if (millis() >= nextThought) {
     nextThought += thoughtDelay;
+	# We need to add a function to handle HTTP requests
     handleCommandChain();
     handleSerial();
   }
+  MDNS.update();
 }
