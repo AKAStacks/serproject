@@ -16,7 +16,6 @@
 int LED = LED_BUILTIN;
 
 #define IRLED D5  // GPIO 14 (D5)
-#define MOTOR D2
 
 IRsend irsend(IRLED);
 // Delay between ticks in ms
@@ -32,7 +31,6 @@ bool stringComplete = false;
 bool inCommandChain = false;
 BrightAdjust brightAdjust = none;
 int currentCommandStep = 0;
-bool motorRun = false;
 
 unsigned long nextThought = 0;
 
@@ -99,14 +97,6 @@ void handleCommandChain() {
     }
   }
 }
-
-/* void doMotor() { */
-/*   if (motorRun) { */
-/*     digitalWrite(MOTOR, HIGH); */
-/*   } else { */
-/*     digitalWrite(MOTOR, LOW); */
-/*   } */
-/* } */
 
 void setup() {
   Serial.begin(9600);
