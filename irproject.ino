@@ -112,6 +112,11 @@ void handleCommandChain() {
   }
 }
 
+void handleRoot() {
+  server.send(200, "text/html",
+  "hello");
+}
+
 void setup() {
   Serial.begin(9600);
 
@@ -133,9 +138,11 @@ void setup() {
   announce("IP address: ");
   announce(WiFi.localIP().toString().c_str());
 
-  if (MDNS.begin("esp8266")) {
+  if (MDNS.begin("tvctl")) {
 	announce("mDNS responder started");
   }
+
+  server.on("/", handleRoot);
   
   irsend.begin();
   /* announce("Waking up... ahh..."); */
