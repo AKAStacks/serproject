@@ -65,6 +65,32 @@ void flashLED() {
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
+void tvToggle() {
+  irsend.sendSAMSUNG(SamsungPowerToggle);
+  announce("OK, turning the TV off...");
+}
+
+void tvBrightUp() {
+  inCommandChain = true;
+  brightAdjust = up;
+  announce("OK, setting TV to day mode.");
+}
+
+void tvBrightDown() {
+  inCommandChain = true;
+  brightAdjust = down;
+  announce("OK, setting TV to night mode.");
+}
+
+void tvExit() {
+      inCommandChain = false;
+      brightAdjust = none;
+      currentCommandStep = 0;
+      irsend.sendSAMSUNG(sExit);
+      irsend.sendSAMSUNG(sExit);
+      irsend.sendSAMSUNG(sExit);
+}
+
 void handleSerial() {
   if (Serial.available()) {
     if (Serial.peek() == '>') {
@@ -72,6 +98,7 @@ void handleSerial() {
     }
     inputString = Serial.readString();
     stringComplete = true;
+    announce(inputString);
   }
   if (stringComplete) {
     flashLED();
@@ -187,32 +214,6 @@ void setup() {
   announce("Waking up... ahh...");
 }
 
-void tvToggle() {
-  irsend.sendSAMSUNG(SamsungPowerToggle);
-  announce("OK, turning the TV off...");
-}
-
-void tvBrightUp() {
-  inCommandChain = true;
-  brightAdjust = up;
-  announce("OK, setting TV to day mode.");
-}
-
-void tvBrightDown() {
-  inCommandChain = true;
-  brightAdjust = down;
-  announce("OK, setting TV to night mode.");
-}
-
-void tvExit() {
-      inCommandChain = false;
-      brightAdjust = none;
-      currentCommandStep = 0;
-      irsend.sendSAMSUNG(sExit);
-      irsend.sendSAMSUNG(sExit);
-      irsend.sendSAMSUNG(sExit);
-}
-
 void loop() {
   if (nextThought == 0) {
     announce("Having my first thought--this is awful.");
@@ -225,5 +226,4 @@ void loop() {
     handleSerial();
   }
   server.handleClient();
-  //MDNS.update();
 }
