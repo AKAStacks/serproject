@@ -147,6 +147,15 @@ void handleRoot() {
    4 = exit */
   server.send(200, "text/html",
   "<html>\
+    <head>\
+      <style>\
+        * button {\
+          width: 100%;\
+          height: 100%;\
+          font-size: 5em;\
+        }\
+      </style>\
+    </head>\
     <body style='background: black; overflow: hidden;'>\
         <div style='width: 100vw; height: 100vh; display: grid; place-items: center; color: white;'>\
        <button type='button' onclick='doLED(1);'>Toggle LED</button>\
