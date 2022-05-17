@@ -158,7 +158,7 @@ void handleRoot() {
     </head>\
     <body style='background: black; overflow: hidden;'>\
         <div style='width: 100vw; height: 100vh; display: grid; place-items: center; color: white;'>\
-       <button type='button' onclick='doLED(1);'>Toggle LED</button>\
+       <button type='button' onclick='doLED(1);'>Toggle TV</button>\
         <button type='button' onclick='doLED(2);'>Daylight</button>\
         <button type='button' onclick='doLED(3);'>Nightlight</button>\
         <button type='button' onclick='doLED(4);'>Cancel</button>\

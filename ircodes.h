@@ -14,6 +14,10 @@ const uint64_t sRight = 0xE0E046B9;
 const uint64_t sLeft = 0xE0E0A659;
 const uint64_t sExit = 0xE0E0B44B;
 const uint64_t sEnter = 0xE0E016E9;
+const uint64_t sMute = 0xE0E0F00F;
+const uint64_t sVolUp = 0xE0E0E01F;
+const uint64_t sVolDown = 0xE0E0E02F;
+const uint64_t sSource = 0xE0E0807F;
 
 // Arrays (reduce then raise)
 uint64_t nightLight[37] = {
