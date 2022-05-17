@@ -91,6 +91,23 @@ void tvExit() {
       irsend.sendSAMSUNG(sExit);
 }
 
+void tvSource() {
+  irsend.sendSAMSUNG(sSource);
+}
+
+void tvMute() {
+  irsend.sendSAMSUNG(sMute);
+  announce("tvMute called.");
+}
+
+void tvVolUp() {
+  irsend.sendSAMSUNG(sVolUp);
+}
+
+void tvVolDown() {
+  irsend.sendSAMSUNG(sVolDown);
+}
+
 void handleSerial() {
   if (Serial.available()) {
     if (Serial.peek() == '>') {
@@ -144,7 +161,11 @@ void handleRoot() {
 /* 1 = toggle TV
    2 = daylight
    3 = nightlight
-   4 = exit */
+   4 = exit 
+   5 = source
+   6 = mute
+   7 = volup
+   8 = voldown */
   server.send(200, "text/html",
   "<html>\
     <head>\
@@ -162,10 +183,15 @@ void handleRoot() {
         <button type='button' onclick='doLED(2);'>Daylight</button>\
         <button type='button' onclick='doLED(3);'>Nightlight</button>\
         <button type='button' onclick='doLED(4);'>Cancel</button>\
+        <button type='button' onclick='doLED(5);'>Source</button>\
+        <button type='button' onclick='doLED(6);'>Mute</button>\
+        <button type='button' onclick='doLED(7);'>Vol Up</button>\
+        <button type='button' onclick='doLED(8);'>Vol Down</button>\
         <script>\
             var ledState = 0;\
             function doLED(doWhat) {\
               let xhttp = new XMLHttpRequest();\
+              xhttp.timeout = 100;\
               xhttp.onreadystatechange = function() {\
                 if (this.readyState == 4 && this.status == 200) {}};\
               if (doWhat == 1) {\
@@ -176,6 +202,16 @@ void handleRoot() {
                 xhttp.open('POST', 'nightlight.txt', true);\
               } else if (doWhat == 4) {\
                 xhttp.open('POST', 'exit.txt', true);\
+              } else if (doWhat == 5) {\
+                xhttp.open('POST', 'source.txt', true);\
+              } else if (doWhat == 6) {\
+                xhttp.open('POST', 'mute.txt', true);\
+              } else if (doWhat == 4) {\
+                xhttp.open('POST', 'exit.txt', true);\
+              } else if (doWhat == 7) {\
+                xhttp.open('POST', 'volup.txt', true);\
+              } else if (doWhat == 8) {\
+                xhttp.open('POST', 'voldown.txt', true);\
               }\
               xhttp.send();\
             };\
@@ -217,6 +253,10 @@ void setup() {
   server.on("/daylight.txt", tvBrightUp);
   server.on("/nightlight.txt", tvBrightDown);
   server.on("/exit.txt", tvExit);
+  server.on("/source.txt", tvSource);
+  server.on("/mute.txt", tvMute);
+  server.on("/volup.txt", tvVolUp);
+  server.on("/voldown.txt", tvVolDown);
   server.begin();
   
   irsend.begin();
