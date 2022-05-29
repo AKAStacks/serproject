@@ -99,21 +99,14 @@ void tvToggle() {
 }
 
 void tvBrightUp() {
-  inCommandChain = true;
-  brightAdjust = up;
   announce("OK, setting TV to day mode.");
 }
 
 void tvBrightDown() {
-  inCommandChain = true;
-  brightAdjust = down;
   announce("OK, setting TV to night mode.");
 }
 
 void tvExit() {
-      inCommandChain = false;
-      brightAdjust = none;
-      currentCommandStep = 0;
 }
 
 void tvSource() {
@@ -198,7 +191,6 @@ void handleRoot() {
 void setup() {
   Serial.begin(9600);
 
-  pinMode(IRLED, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
   // We need to connect to WiFi and set up mDNS here
@@ -238,15 +230,5 @@ void setup() {
 }
 
 void loop() {
-  if (nextThought == 0) {
-    announce("Having my first thought--this is awful.");
-  }
-  if (millis() >= nextThought) {
-	// announce("Having a thought");
-    nextThought += thoughtDelay;
-	// We need to add a function to handle HTTP requests
-    //handleCommandChain();
-    //handleSerial();
-  }
   server.handleClient();
 }
