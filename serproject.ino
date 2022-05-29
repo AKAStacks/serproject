@@ -23,9 +23,6 @@ ESP8266WebServer server(80);
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
-// Delay between ticks in ms
-const int thoughtDelay = 1000;
-
 void announce(String message) {
   if (DEBUG == 1) {
     Serial.println("> " + message);
