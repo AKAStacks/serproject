@@ -1,9 +1,11 @@
 // IR Project
 // This code is without warranty and public domain
 
+#include "credentials.h"
+
 #ifndef STASSID
-#define STASSID "MonkeyMan"
-#define STAPSK "3012773249"
+#define STASSID WIFI_SSID
+#define STAPSK WIFI_PASSWD
 #endif
 
 #include <ESP8266WebServer.h>
