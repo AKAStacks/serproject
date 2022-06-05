@@ -17,7 +17,7 @@
 #define LED_BUILTIN 13 // ESP32 DOES NOT DEFINE LED_BUILTIN
 #endif
 
-#define DEBUG 1
+#define DEBUG 0
 
 int LED = LED_BUILTIN;
 ESP8266WebServer server(80);
@@ -63,10 +63,30 @@ void sendSer(String command) {
     message[4] = 0x02;
     message[5] = 0x00;
   } else if (command == "muteToggle") {
-    message[2] = 0x04;
+    message[2] = 0x02;
     message[3] = 0x00;
     message[4] = 0x00;
     message[5] = 0x00;
+  } else if (command == "dayLight") {
+    message[2] = 0x0b;
+    message[3] = 0x00;
+    message[4] = 0x00;
+    message[5] = 0x00;
+  } else if (command == "nightLight") {
+    message[2] = 0x0b;
+    message[3] = 0x00;
+    message[4] = 0x00;
+    message[5] = 0x02;
+  } else if (command == "sourcePC") {
+    message[2] = 0x0a;
+    message[3] = 0x00;
+    message[4] = 0x05;
+    message[5] = 0x00;    
+  } else if (command == "sourceRoku") {
+    message[2] = 0x0a;
+    message[3] = 0x00;
+    message[4] = 0x05;
+    message[5] = 0x01;      
   }
   // Add checksum at end
   message[6] = calcCheckSum(message);
@@ -78,6 +98,9 @@ void sendSer(String command) {
   }
   Serial1.write(message, sizeof(message));
   Serial1.flush();
+
+  server.send(200, "text/plain", command);
+  
   flashLED();
 }
 
@@ -98,17 +121,21 @@ void tvToggle() {
 }
 
 void tvBrightUp() {
+  sendSer("dayLight");
   announce("OK, setting TV to day mode.");
 }
 
 void tvBrightDown() {
+  sendSer("nightLight");
   announce("OK, setting TV to night mode.");
 }
 
-void tvExit() {
+void tvSourcePC() {
+  sendSer("sourcePC");
 }
 
-void tvSource() {
+void tvSourceRoku() {
+  sendSer("sourceRoku");
 }
 
 void tvMute() {
@@ -137,22 +164,83 @@ void handleRoot() {
     <head>\
       <style>\
         * button {\
-          width: 100%;\
-          height: 100%;\
-          font-size: 5em;\
+         width: 95%;\
+         height: 95%;\
+         font-size: 5em;\
+         margin: .2em;\
+         background-color: 222222;\
+         border-color: 111111;\
+         color: cccccc;\
+         border-radius: .2em;\
+        }\
+        @keyframes buttonPush {\
+          from {background-color: limegreen;}\
+          to {background-color: 222222;}\
+        }\
+        * button:focus {\
+          animation-name: buttonPush;\
+          animation-duration: 2s;\
+        }\
+        #power {\
+          grid-column-start: 1;\
+          grid-column-end: 3;\
+          grid-row-start: 1;\
+          grid-row-end: 1;\
+        }\
+        #mute {\
+          grid-column-start: 1;\
+          grid-column-end: 3;\
+          grid-row-start: 4;\
+          grid-row-end: 4;\
+        }\
+        #daylight {\
+          grid-column-start: 1;\
+          grid-column-end: 1;\
+          grid-row-start: 2;\
+          grid-row-end: 2;\
+        }\
+        #nightlight {\
+          grid-column-start: 1;\
+          grid-column-end: 1;\
+          grid-row-start: 3;\
+          grid-row-end: 3;\
+        }\
+        #pc {\
+          grid-column-start: 2;\
+          grid-column-end: 2;\
+          grid-row-start: 2;\
+          grid-row-end: 2;\
+        }\
+        #roku {\
+          grid-column-start: 2;\
+          grid-column-end: 2;\
+          grid-row-start: 3;\
+          grid-row-end: 3;\
+        }\
+        #volup {\
+         grid-row-start: 5;\
+         grid-row-end: 5;\
+         grid-column-start: 1;\
+         grid-column-end: 3;\
+        }\
+        #voldown {\
+         grid-row-start: 6;\
+         grid-row-end: 6;\
+         grid-column-start: 1;\
+         grid-column-end: 3;\
         }\
       </style>\
     </head>\
-    <body style='background: black; overflow: hidden;'>\
-        <div style='width: 100vw; height: 100vh; display: grid; place-items: center; color: white;'>\
-       <button type='button' onclick='doLED(1);'>Toggle TV</button>\
-        <button type='button' onclick='doLED(2);'>Daylight</button>\
-        <button type='button' onclick='doLED(3);'>Nightlight</button>\
-        <button type='button' onclick='doLED(4);'>Cancel</button>\
-        <button type='button' onclick='doLED(5);'>Source</button>\
-        <button type='button' onclick='doLED(6);'>Mute</button>\
-        <button type='button' onclick='doLED(7);'>Vol Up</button>\
-        <button type='button' onclick='doLED(8);'>Vol Down</button>\
+    <body style='background: black; overflow: scroll;'>\
+        <div style='width: 100vw; height: 100vh; display: grid; place-items: center; grid-template-columns: 50% 50%; grid-template-rows: auto auto auto auto auto auto; color: white;'>\
+        <button id='power' type='button' onclick='doLED(1);'>Toggle TV</button>\
+        <button id='daylight' type='button' onclick='doLED(2);'>Daylight</button>\
+        <button id='nightlight' type='button' onclick='doLED(3);'>Nightlight</button>\
+        <button id='pc' type='button' onclick='doLED(4);'>PC</button>\
+        <button id='roku' type='button' onclick='doLED(5);'>Roku</button>\
+        <button id='mute' type='button' onclick='doLED(6);'>Mute</button>\
+        <button id='volup' type='button' onclick='doLED(7);'>Vol Up</button>\
+        <button id='voldown' type='button' onclick='doLED(8);'>Vol Down</button>\
         <script>\
             var ledState = 0;\
             function doLED(doWhat) {\
@@ -167,9 +255,9 @@ void handleRoot() {
               } else if (doWhat == 3) {\
                 xhttp.open('POST', 'nightlight.txt', true);\
               } else if (doWhat == 4) {\
-                xhttp.open('POST', 'exit.txt', true);\
+                xhttp.open('POST', 'sourcepc.txt', true);\
               } else if (doWhat == 5) {\
-                xhttp.open('POST', 'source.txt', true);\
+                xhttp.open('POST', 'sourceroku.txt', true);\
               } else if (doWhat == 6) {\
                 xhttp.open('POST', 'mute.txt', true);\
               } else if (doWhat == 4) {\
@@ -215,8 +303,8 @@ void setup() {
   server.on("/toggle.txt", tvToggle);
   server.on("/daylight.txt", tvBrightUp);
   server.on("/nightlight.txt", tvBrightDown);
-  server.on("/exit.txt", tvExit);
-  server.on("/source.txt", tvSource);
+  server.on("/sourcepc.txt", tvSourcePC);
+  server.on("/sourceroku.txt", tvSourceRoku);
   server.on("/mute.txt", tvMute);
   server.on("/volup.txt", tvVolUp);
   server.on("/voldown.txt", tvVolDown);
