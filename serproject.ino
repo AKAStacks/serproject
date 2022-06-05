@@ -41,7 +41,7 @@ void flashLED() {
 
 void sendSer(String command) {
   // Define static bytes
-  byte message[8];
+  byte message[7];
   message[0] = 0x08;
   message[1] = 0x22;
 
@@ -51,7 +51,7 @@ void sendSer(String command) {
     message[2] = 0x00;
     message[3] = 0x00;
     message[4] = 0x00;
-    message[5] = 0x02;
+    message[5] = 0x00;
   } else if (command == "volumeUp") {
     message[2] = 0x01;
     message[3] = 0x00;
