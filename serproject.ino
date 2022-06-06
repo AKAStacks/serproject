@@ -177,8 +177,12 @@ void handleRoot() {
           from {background-color: limegreen;}\
           to {background-color: 222222;}\
         }\
-        * button:focus {\
+        .buttonClicked {\
           animation-name: buttonPush;\
+          animation-duration: 2s;\
+        }\
+        .reset {\
+          animation-name: none;\
           animation-duration: 2s;\
         }\
         #power {\
@@ -233,19 +237,20 @@ void handleRoot() {
     </head>\
     <body style='background: black; overflow: scroll;'>\
         <div style='width: 100vw; height: 100vh; display: grid; place-items: center; grid-template-columns: 50% 50%; grid-template-rows: auto auto auto auto auto auto; color: white;'>\
-        <button id='power' type='button' onclick='doLED(1);'>Toggle TV</button>\
-        <button id='daylight' type='button' onclick='doLED(2);'>Daylight</button>\
-        <button id='nightlight' type='button' onclick='doLED(3);'>Nightlight</button>\
-        <button id='pc' type='button' onclick='doLED(4);'>PC</button>\
-        <button id='roku' type='button' onclick='doLED(5);'>Roku</button>\
-        <button id='mute' type='button' onclick='doLED(6);'>Mute</button>\
-        <button id='volup' type='button' onclick='doLED(7);'>Vol Up</button>\
-        <button id='voldown' type='button' onclick='doLED(8);'>Vol Down</button>\
+        <button id='power' type='button' onclick='doLED(event, 1);'>Toggle TV</button>\
+        <button id='daylight' type='button' onclick='doLED(event, 2);'>Daylight</button>\
+        <button id='nightlight' type='button' onclick='doLED(event, 3);'>Nightlight</button>\
+        <button id='pc' type='button' onclick='doLED(event, 4);'>PC</button>\
+        <button id='roku' type='button' onclick='doLED(event, 5);'>Roku</button>\
+        <button id='mute' type='button' onclick='doLED(event, 6);'>Mute</button>\
+        <button id='volup' type='button' onclick='doLED(event, 7);'>Vol Up</button>\
+        <button id='voldown' type='button' onclick='doLED(event, 8);'>Vol Down</button>\
         <script>\
             var ledState = 0;\
-            function doLED(doWhat) {\
+            function doLED(event, doWhat) {\
+              event.target.className = 'reset';\
+              event.target.offsetWidth;\
               let xhttp = new XMLHttpRequest();\
-              xhttp.timeout = 500;\
               xhttp.onreadystatechange = function() {\
                 if (this.readyState == 4 && this.status == 200) {}};\
               if (doWhat == 1) {\
@@ -268,6 +273,7 @@ void handleRoot() {
                 xhttp.open('POST', 'voldown.txt', true);\
               }\
               xhttp.send();\
+              event.target.className = 'buttonClicked';\
             };\
         </script>\
       </div>\
